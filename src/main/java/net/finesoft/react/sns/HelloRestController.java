@@ -80,7 +80,10 @@ public class HelloRestController {
 	
 	@RequestMapping("/")
 	public String index() {
-		return "helloworld!";
+		return 
+"<script type='text/javascript'>"+
+"location.href='index.html';"+
+"</script>";
 	}
 	
 	class Test {
