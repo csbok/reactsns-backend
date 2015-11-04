@@ -1,4 +1,2 @@
 *.class
 bin
-
-src/main/resources/application.properties
