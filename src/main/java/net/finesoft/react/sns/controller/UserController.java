@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import net.finesoft.react.sns.article.Article;
 import net.finesoft.react.sns.article.ArticleRepository;
 import net.finesoft.react.sns.follow.Follow;
 import net.finesoft.react.sns.follow.FollowRepository;
+import net.finesoft.react.sns.good.Good;
 import net.finesoft.react.sns.good.GoodRepository;
 import net.finesoft.react.sns.user.User;
 import net.finesoft.react.sns.user.UserRepository;
@@ -160,17 +162,26 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/follow/{leader_no}")
-	public boolean follow(@PathVariable Integer leader_no, HttpSession session) {
-		if (session.getAttribute("user_no") == null) {
-			return false;
+	public Map<String, Object> follow(@PathVariable Integer leader_no, HttpSession session) {
+		User my = ArticleController.getMyUser(userRepo, session);
+		if (my == null) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("result", false);
+			return map;
 		}
 		
 		Integer user_no = (Integer)session.getAttribute("user_no");
-		User my = userRepo.findOne(user_no);
 		User leader = userRepo.findOne(leader_no);
 
-		if (followRepo.countByLeaderAndLover(leader, my) > 0) {
-			return false;
+		Follow before = followRepo.findByLeaderAndLover(leader, my);
+		if (before != null) {
+			followRepo.delete(before);
+			
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("result", true);
+			map.put("leader_no", leader_no);
+			map.put("follow", false);
+			return map;
 		}
 		
 		Follow follow = new Follow();
@@ -179,8 +190,13 @@ public class UserController {
 		
 		followRepo.save(follow);
 		
-		return true;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("result", true);
+		map.put("leader_no", leader_no);
+		map.put("follow", true);
+		return map;
 	}
+	
 	
 	@RequestMapping(value = "/check")
 	public Map<String, String> check(HttpSession session) {

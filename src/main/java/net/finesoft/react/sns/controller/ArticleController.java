@@ -96,6 +96,7 @@ public class ArticleController {
 
             map.put("article_no", article.getArticle_no());
             map.put("author", article.getUser().getUserName());
+            map.put("user_no", article.getUser().getUser_no());
             map.put("content", article.getContent());
             //map.put("comment_list", commentList(article.getArticle_no()));
             map.put("good_count", goodRepo.countByArticle(article));

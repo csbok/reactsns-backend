@@ -24,11 +24,11 @@ public class Follow {
 	@GeneratedValue
 	int id;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "leader_user_no")
 	private User leader;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "lover_user_no")
 	private User lover;
 }
