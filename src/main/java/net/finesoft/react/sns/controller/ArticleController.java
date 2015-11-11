@@ -28,6 +28,7 @@ import net.finesoft.react.sns.article.Article;
 import net.finesoft.react.sns.article.ArticleRepository;
 import net.finesoft.react.sns.comment.Comment;
 import net.finesoft.react.sns.comment.CommentRepository;
+import net.finesoft.react.sns.follow.FollowRepository;
 import net.finesoft.react.sns.good.Good;
 import net.finesoft.react.sns.good.GoodRepository;
 import net.finesoft.react.sns.user.User;
@@ -47,6 +48,9 @@ public class ArticleController {
 	
 	@Autowired
 	private CommentRepository commentRepo;
+	
+	@Autowired
+	private FollowRepository followRepo;
 	
 	@RequestMapping(value="/upload", method=RequestMethod.POST)
     public String handleFileUpload(//@RequestParam("name") String name,
@@ -95,8 +99,9 @@ public class ArticleController {
             Map<String, Object> map = new HashMap<String, Object>();
 
             map.put("article_no", article.getArticle_no());
-            map.put("author", article.getUser().getUserName());
-            map.put("user_no", article.getUser().getUser_no());
+            User user = article.getUser();
+            map.put("author", user.getUserName());
+            map.put("user_no", user.getUser_no());
             map.put("content", article.getContent());
             //map.put("comment_list", commentList(article.getArticle_no()));
             map.put("good_count", goodRepo.countByArticle(article));
@@ -106,19 +111,46 @@ public class ArticleController {
     			if (goodRepo.findByArticleAndUser(article,my) != null) {
     	            map.put("good_already", true);
     			}
+
+    			if (followRepo.findByLeaderAndLover(article.getUser(), my) != null) {
+        			map.put("follow", true);
+        		}
     		}
-            
+
+           
             list.add(map);
         }
         
         return list;
     }
+
+
+    
+    @RequestMapping(value = "/timeline")
+    public List<Map<String, Object>> getTimeLineArticle(HttpSession session) {
+    	List<Map<String, Object>> list = new ArrayList<Map<String,Object>>();
+
+    	User user = userRepo.findFirstByUserName("curtis");
+    	articleRepo.findTimeLine(user);
+    	return list;
+    }
 	
 	@RequestMapping(value = "/article/new")
 	public List<Article> newArticle() {
-		return articleRepo.findAll(new Sort(new Order(Direction.DESC, "created")));
+//		return articleRepo.findAll(new Sort(new Order(Direction.DESC, "created")));
+    	User user = userRepo.findFirstByUserName("curtis");
+    	return articleRepo.findTimeLine(user);
 	}
 
+	@RequestMapping(value = "/testarticle")
+	public List<Object> newArticle2() {
+//		return articleRepo.findAll(new Sort(new Order(Direction.DESC, "created")));
+    	User user = userRepo.findFirstByUserName("curtis");
+    	System.out.println(user.getUser_no());
+    	return articleRepo.findNewArticle(user.getUser_no());
+	}
+
+	
 
 	@RequestMapping(value ="/comment/{article_no}", method = RequestMethod.POST)
 	public Map<String, Object> addComment(@PathVariable int article_no, @RequestParam Map<String, Object> paramMap, HttpSession session)
